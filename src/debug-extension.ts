@@ -39,9 +39,9 @@ export function activate(): void {
                const value = 
                    `Sourcegraph version: ${version}`
 
-               return setDecorations(pos, value).then(() => Promise.resolve(value))
+               return setDecorations(pos, value).then(() => Promise.resolve(version))
            })
-               .then(version => ({ contents: { value: `Sourcegraph version: ${version}` } }))
+               .then(version => ({ contents: { value: version } }))
        },
    })
 }
