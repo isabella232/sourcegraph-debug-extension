@@ -7,8 +7,12 @@ async function fetchSourcegraphVersion(): Promise<string> {
     }
 }
 `
-    return sourcegraph.commands.executeCommand<{data: {site: {productVersion: string}}, errors: any[]}>('queryGraphQL', query)
-        .then(({data, errors}) => {
+    return sourcegraph.commands
+        .executeCommand<{
+            data: { site: { productVersion: string } }
+            errors: any[]
+        }>('queryGraphQL', query)
+        .then(({ data, errors }) => {
             if (!data) {
                 return 'Error with the Sourcegraph API: ' + JSON.stringify(errors)
             }
@@ -22,26 +26,27 @@ export function activate(): void {
         const editor = sourcegraph.app.activeWindow ? sourcegraph.app.activeWindow.visibleViewComponents[0] : undefined
 
         if (editor) {
-            editor.setDecorations(null, [{
-                range: new sourcegraph.Range( pos, pos),
-                after: {
-                    contentText: version,
-                    hoverMessage: version,
-                    color: 'blue',
-                }
-            }])
+            editor.setDecorations(null, [
+                {
+                    range: new sourcegraph.Range(pos, pos),
+                    after: {
+                        contentText: version,
+                        hoverMessage: version,
+                        color: 'blue',
+                    },
+                },
+            ])
         }
     }
 
-   sourcegraph.languages.registerHoverProvider(['*'], {
-       provideHover: (doc, pos) => {
-           return fetchSourcegraphVersion().then(version => {
-               const value = 
-                   `Sourcegraph version: ${version}`
+    sourcegraph.languages.registerHoverProvider(['*'], {
+        provideHover: (doc, pos) =>
+            fetchSourcegraphVersion()
+                .then(version => {
+                    const value = `Sourcegraph version: ${version}`
 
-               return setDecorations(pos, value).then(() => Promise.resolve(version))
-           })
-               .then(version => ({ contents: { value: version } }))
-       },
-   })
+                    return setDecorations(pos, value).then(() => Promise.resolve(version))
+                })
+                .then(version => ({ contents: { value: version } })),
+    })
 }
